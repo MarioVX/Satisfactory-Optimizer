@@ -31,17 +31,17 @@ warnings.filterwarnings("ignore")
 
 # ----- general settings -----
 MinerMK = 3  # 1 to 3
-BeltMK = 5  # 1 to 5
+BeltMK = 6  # 1 to 6
 PipeMK = 2  # 1 or 2
-GeysersOccupied = (3, 9, 6)  # impure, normal, pure
+GeysersOccupied = (9, 13, 9)  # impure, normal, pure
 FreeExtraPower = 0.0  # not including Geysers
 PumpsPerPipe = 0.0  # 1 per mk1 + 2 per mk2
-ExtractClockSteps = 500 # extractor's clock speed domain is divded in this many points. more: greater accuracy and computational expense
+ExtractClockSteps = 100 # extractor's clock speed domain is divded in this many points. more: greater accuracy and computational expense
 MinClock = 0.01
 
 MinerBasePower = {1: 5, 2: 12, 3: 30}
 MinerBaseSpeed = np.array([[30, 60, 120], [60, 120, 240], [120, 240, 480]])
-BeltCapacity = {1: 60, 2: 120, 3: 270, 4: 480, 5: 780}
+BeltCapacity = {1: 60, 2: 120, 3: 270, 4: 480, 5: 780, 6: 1200}
 PipeCapacity = {1: 300, 2: 600}
 GeothermalBasePower = 100.0 # on impure Geysir
 
@@ -82,9 +82,10 @@ regB("Manufacturer", 55.0)
 regB("Packager", 10.0)
 regB("Refinery", 30.0)
 regB("Blender", 75.0)
-regB("Particle Accelerator IPC", 375.0)
-regB("Particle Accelerator NP", 1000.0)
-regB("Particle Accelerator PP", 500.0)
+regB("Particle Accelerator 1000", 1000.0)
+regB("Particle Accelerator 500", 500.0)
+regB("Converter", 250.0)
+regB("Quantum Encoder", 1000.0)
 regB("Smelter", 4.0)
 regB("Foundry", 16.0)
 regB("AWESOME Sink", 30.0)
@@ -116,33 +117,16 @@ def regPB(name: str, powerbase: float, exp=1):
 
 
 regPB("Coal Generator", -75.0)
-regPB("Fuel Generator", -150.0)
+regPB("Fuel Generator", -250.0)
 regPB("Nuclear Power Plant", -2500.0)
 
 
-# ----- building clock speed settings -----
-Buildings["Water Extractor"].clock = 1.0
-Buildings["Constructor"].clock = 1.0
-Buildings["Assembler"].clock = 1.0
-Buildings["Manufacturer"].clock = 1.0
-Buildings["Packager"].clock = 1.0
-Buildings["Refinery"].clock = 1.0
-Buildings["Blender"].clock = 1.0
-Buildings["Particle Accelerator IPC"].clock = 1.0
-Buildings["Particle Accelerator NP"].clock = 1.0
-Buildings["Particle Accelerator PP"].clock = 1.0
-Buildings["Smelter"].clock = 1.0
-Buildings["Foundry"].clock = 1.0
-Buildings["Coal Generator"].clock = 1.0
-Buildings["Fuel Generator"].clock = 1.0
-Buildings["Nuclear Power Plant"].clock = 1.0
-
-def setclocks(clock: float):
-    for bn in ("Water Extractor", "Constructor", "Assembler", "Manufacturer", "Packager", "Refinery", "Blender",
-               "Particle Accelerator IPC", "Particle Accelerator NP", "Particle Accelerator PP",
-               "Smelter", "Foundry"):
-        Buildings[bn].clock = clock
-    return None
+# def setclocks(clock: float):
+#     for bn in ("Water Extractor", "Constructor", "Assembler", "Manufacturer", "Packager", "Refinery", "Blender",
+#                "Particle Accelerator IPC", "Particle Accelerator NP", "Particle Accelerator PP",
+#                "Smelter", "Foundry"):
+#         Buildings[bn].clock = clock
+#     return None
 
 Nodes = dict()
 
@@ -160,17 +144,17 @@ def regN(resource: str, nodes: tuple):
     return None
 
 # ----- Resource Nodes -----
-regN("Limestone", (12, 47, 27))
-regN("Iron Ore", (33, 41, 46))
-regN("Copper Ore", (9, 28, 12))
-regN("Caterium Ore", (0, 8, 8))
-regN("Coal", (6, 29, 15))
+regN("Limestone", (15, 49, 30))
+regN("Iron Ore", (39, 42, 46))
+regN("Copper Ore", (13, 29, 13))
+regN("Caterium Ore", (0, 9, 8))
+regN("Coal", (15, 31, 16))
 regN("Crude Oil", (10, 12, 8))
-regN("Sulfur", (1, 7, 3))
+regN("Sulfur", (6, 5, 5))
 regN("Bauxite", (5, 6, 6))
-regN("Raw Quartz", (0, 11, 5))
-regN("Uranium", (1, 3, 0))
-#regN("S.A.M. Ore", (8,5,0))
+regN("Raw Quartz", (3, 7, 7))
+regN("Uranium", (3, 2, 0))
+regN("SAM", (10, 6, 3))
 
 
 Wells = dict()
@@ -190,6 +174,7 @@ def regW(resource: str, nodes: tuple):
 # ----- Resource Wells -----
 regW("Crude Oil", (0, 3, 3))  # Red Bamboo Fields
 regW("Crude Oil", (6, 0, 0))  # Swamp
+regW("Crude Oil", (2, 3, 1))  # Islands
 regW("Nitrogen Gas", (0, 2, 5))  # Red Oasis
 regW("Nitrogen Gas", (0, 1, 6))  # Rocky Desert
 regW("Nitrogen Gas", (0, 0, 7))  # Jungle Spires
@@ -197,10 +182,10 @@ regW("Nitrogen Gas", (0, 0, 10))  # Eastern Dune Forest
 regW("Nitrogen Gas", (0, 2, 4))  # Blue Crater
 regW("Nitrogen Gas", (2, 2, 4))  # Abyss Cliffs
 regW("Water", (2,1,4)) # Dune Desert (north)
-regW("Water", (0,0,6)) # Dune Desert (south)
+regW("Water", (0,2,4)) # Dune Desert (south)
 regW("Water", (1,2,4)) # Desert Canyons
 regW("Water", (0,0,6)) # Eastern Dune Forest (north)
-regW("Water", (2,6,0)) # Eastern Dune Forst (south)
+regW("Water", (2,6,0)) # Eastern Dune Forest (south)
 regW("Water", (2,0,5)) # Grass Fields
 regW("Water", (0,1,6)) # Snaketree Forest
 regW("Water", (0,0,7)) # Red Jungle
@@ -335,6 +320,7 @@ regER("Uranium", "Miner")
 regER("Water", "Resource Well Pressurizer")
 regER("Crude Oil", "Resource Well Pressurizer")
 regER("Nitrogen Gas", "Resource Well Pressurizer")
+regER("SAM", "Miner")
 
 
 def regR(name: str, inputs: dict, outputs: dict, building: str):
@@ -352,14 +338,17 @@ def regR(name: str, inputs: dict, outputs: dict, building: str):
 regR("pump_Water", dict(), {"Water":120}, "Water Extractor")
 
 # ----- power recipes -----
-regR("power_Coal", {"Coal":60/4.0, "Water":45}, dict(), "Coal Generator")
-regR("power_CompactedCoal", {"Compacted Coal":60/8.4, "Water":45}, dict(), "Coal Generator")
-regR("power_PetroleumCoke", {"Petroleum Coke":60/2.4, "Water":45}, dict(), "Coal Generator")
-regR("power_Fuel", {"Fuel":12.0}, dict(), "Fuel Generator")
-# regR("power_LiquidBiofuel", {"Liquid Biofuel":12.0}, dict(), "Fuel Generator")
-regR("power_Turbofuel", {"Turbofuel":4.5}, dict(), "Fuel Generator")
+regR("power_Coal", {"Coal":15, "Water":45}, dict(), "Coal Generator")
+regR("power_CompactedCoal", {"Compacted Coal":50/7.0, "Water":45}, dict(), "Coal Generator")
+regR("power_PetroleumCoke", {"Petroleum Coke":25, "Water":45}, dict(), "Coal Generator")
+regR("power_Fuel", {"Fuel":20}, dict(), "Fuel Generator")
+# regR("power_LiquidBiofuel", {"Liquid Biofuel":20}, dict(), "Fuel Generator")
+regR("power_Turbofuel", {"Turbofuel":7.5}, dict(), "Fuel Generator")
+regR("power_RocketFuel", {"Rocket Fuel":25/6.0}, dict(), "Fuel Generator")
+regR("power_IonizedFuel", {"Ionized Fuel":3}, dict(), "Fuel Generator")
 regR("power_UraniumFuelRod", {"Uranium Fuel Rod":0.2, "Water":240},{"Uranium Waste":10}, "Nuclear Power Plant")
 regR("power_PlutoniumFuelRod", {"Plutonium Fuel Rod":0.1, "Water":240},{"Plutonium Waste":1}, "Nuclear Power Plant")
+regR("power_FicsoniumFuelRod", {"Ficsonium Fuel Rod":1, "Water":240},dict(), "Nuclear Power Plant")
 
 # ----- processing recipes -----
 # ---- start ----
@@ -397,11 +386,11 @@ regR("r_SteelPipe", {"Steel Ingot":30}, {"Steel Pipe":20}, "Constructor")
 regR("r_VersatileFramework", {"Modular Frame":2.5, "Steel Beam":30}, {"Versatile Framework":5}, "Assembler")
 
 # ---- T4 Advanced Steel Production ----
-regR("r_EncasedIndustrialBeam", {"Steel Beam":24, "Concrete":30}, {"Encased Industrial Beam":6}, "Assembler")
+regR("r_EncasedIndustrialBeam", {"Steel Beam":18, "Concrete":36}, {"Encased Industrial Beam":6}, "Assembler")
 regR("r_Stator", {"Steel Pipe":15, "Wire":40}, {"Stator":5}, "Assembler")
 regR("r_Motor", {"Rotor":10, "Stator":10}, {"Motor":5}, "Assembler")
 regR("r_AutomatedWiring", {"Stator":2.5, "Cable":50}, {"Automated Wiring":2.5}, "Assembler")
-regR("r_HeavyModularFrame", {"Modular Frame":10, "Steel Pipe":30, "Encased Industrial Beam":10, "Screw":200}, {"Heavy Modular Frame":2}, "Manufacturer")
+regR("r_HeavyModularFrame", {"Modular Frame":10, "Steel Pipe":40, "Encased Industrial Beam":10, "Screw":240}, {"Heavy Modular Frame":2}, "Manufacturer")
 
 # ---- T5 Oil Processing ----
 regR("r_Plastic", {"Crude Oil":30}, {"Plastic":20, "Heavy Oil Residue":10}, "Refinery")
@@ -430,13 +419,12 @@ regR("r_PackagedWater", {"Water":60, "Empty Canister":60}, {"Packaged Water":60}
 regR("r_UnpackageWater", {"Packaged Water":120}, {"Water":120, "Empty Canister":120}, "Packager")
 
 # ---- T5 Industrial Manufacturing ----
-regR("r_Computer", {"Circuit Board":25, "Cable":22.5, "Plastic":45, "Screw":130}, {"Computer":2.5}, "Manufacturer")
+regR("r_Computer", {"Circuit Board":10, "Cable":20, "Plastic":40}, {"Computer":2.5}, "Manufacturer")
 regR("r_ModularEngine", {"Motor":2, "Rubber":15, "Smart Plating":2}, {"Modular Engine":1}, "Manufacturer")
-regR("r_AdaptiveControlUnit", {"Automated Wiring":7.5, "Circuit Board":5, "Heavy Modular Frame":1, "Computer":1}, {"Adaptive Control Unit":1}, "Manufacturer")
-regR("r_Beacon", {"Iron Plate":22.5, "Iron Rod":7.5, "Wire":112.5, "Cable":15}, {"Beacon":7.5}, "Manufacturer")
+regR("r_AdaptiveControlUnit", {"Automated Wiring":5, "Circuit Board":5, "Heavy Modular Frame":1, "Computer":2}, {"Adaptive Control Unit":1}, "Manufacturer")
 
 # ---- T5 Gas Mask ----
-regR("r_GasFilter", {"Coal":37.5, "Rubber":15, "Fabric":15}, {"Gas Filter":7.5}, "Manufacturer")
+regR("r_GasFilter", {"Fabric":15, "Coal":30, "Iron Plate":15}, {"Gas Filter":7.5}, "Manufacturer")
 
 # ---- T7 Bauxite Refinement ----
 regR("r_AluminaSolution", {"Bauxite":120, "Water":180}, {"Alumina Solution":120, "Silica":50}, "Refinery")
@@ -446,7 +434,7 @@ regR("r_AluminumScrap", {"Alumina Solution":240, "Coal":120}, {"Aluminum Scrap":
 regR("r_AluminumIngot", {"Aluminum Scrap":90, "Silica":75}, {"Aluminum Ingot":60}, "Foundry")
 regR("r_AlcladAluminumSheet", {"Aluminum Ingot":30, "Copper Ingot":10}, {"Alclad Aluminum Sheet":30}, "Assembler")
 regR("r_AluminumCasing", {"Aluminum Ingot":90}, {"Aluminum Casing":60}, "Constructor")
-regR("r_RadioControlUnit", {"Aluminum Casing":40, "Crystal Oscillator":1.25, "Computer":1.25}, {"Radio Control Unit":2.5}, "Manufacturer")
+regR("r_RadioControlUnit", {"Aluminum Casing":40, "Crystal Oscillator":1.25, "Computer":2.5}, {"Radio Control Unit":2.5}, "Manufacturer")
 
 # ---- T7 Hazmat Suit ----
 regR("r_IodineInfusedFilter", {"Gas Filter":3.75, "Quickwire":30, "Aluminum Casing":3.75}, {"Iodine Infused Filter":3.75}, "Manufacturer")
@@ -458,19 +446,22 @@ regR("r_UnpackageSulfuricAcid", {"Packaged Sulfuric Acid":60}, {"Sulfuric Acid":
 regR("r_Battery", {"Sulfuric Acid":50, "Alumina Solution":40, "Aluminum Casing":20}, {"Battery":20, "Water":30}, "Blender")
 regR("r_AssemblyDirectorSystem", {"Adaptive Control Unit":1.5, "Supercomputer":0.75}, {"Assembly Director System":0.75}, "Assembler")
 
+regR("r_Supercomputer", {"Computer":7.5, "AI Limiter":3.75, "High-Speed Connector":5.625, "Plastic":52.5}, {"Supercomputer":1.875}, "Manufacturer")
+
+
 # ---- T8 Advanced Aluminum Production ----
 regR("r_EmptyFluidTank", {"Aluminum Ingot":60}, {"Empty Fluid Tank":60}, "Constructor")
 regR("r_PackagedNitrogenGas", {"Nitrogen Gas":240, "Empty Fluid Tank":60}, {"Packaged Nitrogen Gas":60}, "Packager")
 regR("r_UnpackageNitrogenGas", {"Packaged Nitrogen Gas":60}, {"Nitrogen Gas":240, "Empty Fluid Tank":60}, "Packager")
 regR("r_HeatSink", {"Alclad Aluminum Sheet":37.5, "Copper Sheet":22.5}, {"Heat Sink":7.5}, "Assembler")
 regR("r_CoolingSystem", {"Heat Sink":12, "Rubber":12, "Water":30, "Nitrogen Gas":150}, {"Cooling System":6}, "Blender")
-regR("r_FusedModularFrame", {"Heavy Modular Frame":1.6, "Aluminum Casing":75, "Nitrogen Gas":37.5}, {"Fused Modular Frame":1.5}, "Blender")
+regR("r_FusedModularFrame", {"Heavy Modular Frame":1.5, "Aluminum Casing":75, "Nitrogen Gas":37.5}, {"Fused Modular Frame":1.5}, "Blender")
 
 # ---- T8 Nuclear Power ----
 regR("r_EncasedUraniumCell", {"Uranium":50, "Concrete":15, "Sulfuric Acid":40}, {"Encased Uranium Cell":25, "Sulfuric Acid":10}, "Blender")
 regR("r_ElectromagneticControlRod", {"Stator":6, "AI Limiter":4}, {"Electromagnetic Control Rod":4}, "Assembler")
 regR("r_UraniumFuelRod", {"Encased Uranium Cell":20, "Encased Industrial Beam":1.2, "Electromagnetic Control Rod":2}, {"Uranium Fuel Rod":0.4}, "Manufacturer")
-regR("r_MagneticFieldGenerator", {"Versatile Framework":2.5, "Electromagnetic Control Rod":1, "Battery":5}, {"Magnetic Field Generator":1}, "Manufacturer")
+regR("r_MagneticFieldGenerator", {"Versatile Framework":2.5, "Electromagnetic Control Rod":1}, {"Magnetic Field Generator":1}, "Assembler")
 
 # ---- T8 Leading-edge Production ----
 regR("r_TurboMotor", {"Cooling System":7.5, "Radio Control Unit":3.75, "Motor":7.5, "Rubber":45}, {"Turbo Motor":1.875}, "Manufacturer")
@@ -481,164 +472,250 @@ regR("r_NitricAcid", {"Nitrogen Gas":120, "Water":30, "Iron Plate":10}, {"Nitric
 regR("r_PackagedNitricAcid", {"Nitric Acid":30, "Empty Fluid Tank":30}, {"Packaged Nitric Acid":30}, "Packager")
 regR("r_UnpackageNitricAcid", {"Packaged Nitric Acid":20}, {"Nitric Acid":20, "Empty Fluid Tank":20}, "Packager")
 regR("r_Non-fissileUranium", {"Uranium Waste":37.5, "Silica":25, "Nitric Acid":15, "Sulfuric Acid":15}, {"Non-fissile Uranium":50, "Water":15}, "Blender")
-regR("r_PlutoniumPellet", {"Non-fissile Uranium":100, "Uranium Waste":25}, {"Plutonium Pellet":30}, "Particle Accelerator PP")
+regR("r_PlutoniumPellet", {"Non-fissile Uranium":100, "Uranium Waste":25}, {"Plutonium Pellet":30}, "Particle Accelerator 500")
 regR("r_EncasedPlutoniumCell", {"Plutonium Pellet":10, "Concrete":20}, {"Encased Plutonium Cell":5}, "Assembler")
 regR("r_PlutoniumFuelRod", {"Encased Plutonium Cell":7.5, "Steel Beam":4.5, "Electromagnetic Control Rod":1.5, "Heat Sink":2.5}, {"Plutonium Fuel Rod":0.25}, "Manufacturer")
 regR("r_CopperPowder", {"Copper Ingot":300}, {"Copper Powder":50}, "Constructor")
 regR("r_PressureConversionCube", {"Fused Modular Frame":1, "Radio Control Unit":2}, {"Pressure Conversion Cube":1}, "Assembler")
-regR("r_NuclearPasta", {"Copper Powder":100, "Pressure Conversion Cube":0.5}, {"Nuclear Pasta":0.5}, "Particle Accelerator NP")
+regR("r_NuclearPasta", {"Copper Powder":100, "Pressure Conversion Cube":0.5}, {"Nuclear Pasta":0.5}, "Particle Accelerator 1000")
+
+# ---- T9 Matter Conversion ----
+regR("r_Bauxite(Caterium)", {"Reanimated SAM":10, "Caterium Ore":150}, {"Bauxite":120}, "Converter")
+regR("r_Bauxite(Copper)", {"Reanimated SAM":10, "Copper Ore":180}, {"Bauxite":120}, "Converter")
+regR("r_BiochemicalSculptor", {"Assembly Director System":0.5, "Ficsite Trigon":40, "Water":10}, {"Biochemical Sculptor":2}, "Blender")
+regR("r_CateriumOre(Copper)", {"Reanimated SAM":10, "Copper Ore":150}, {"Caterium Ore":120}, "Converter")
+regR("r_CateriumOre(Quartz)", {"Reanimated SAM":10, "Raw Quartz":120}, {"Caterium Ore":120}, "Converter")
+regR("r_Coal(Iron)", {"Reanimated SAM":10, "Iron Ore":180}, {"Coal":120}, "Converter")
+regR("r_Coal(Limestone)", {"Reanimated SAM":10, "Limestone":360}, {"Coal":120}, "Converter")
+regR("r_CopperOre(Quartz)", {"Reanimated SAM":10, "Raw Quartz":100}, {"Copper Ore":120}, "Converter")
+regR("r_CopperOre(Sulfur)", {"Reanimated SAM":10, "Sulfur":120}, {"Copper Ore":120}, "Converter")
+regR("r_Diamonds", {"Coal":600}, {"Diamonds":30}, "Particle Accelerator 500")
+regR("r_FicsiteIngot(Aluminum)", {"Reanimated SAM":60, "Aluminum Ingot":120}, {"Ficsite Ingot":30}, "Converter")
+regR("r_FicsiteIngot(Caterium)", {"Reanimated SAM":45, "Caterium Ingot":60}, {"Ficsite Ingot":15}, "Converter")
+regR("r_FicsiteIngot(Iron)", {"Reanimated SAM":40, "Iron Ingot":240}, {"Ficsite Ingot":10}, "Converter")
+regR("r_FicsiteTrigon", {"Ficsite Ingot":10}, {"Ficsite Trigon":30}, "Constructor")
+regR("r_IronOre(Limestone)", {"Reanimated SAM":10, "Limestone":240}, {"Iron Ore":120}, "Converter")
+regR("r_Limestone(Sulfur)", {"Reanimated SAM":10, "Sulfur":20}, {"Limestone":120}, "Converter")
+regR("r_NitrogenGas(Bauxite)", {"Reanimated SAM":10, "Bauxite":100}, {"Nitrogen Gas":120}, "Converter")
+regR("r_NitrogenGas(Caterium)", {"Reanimated SAM":10, "Caterium Ore":120}, {"Nitrogen Gas":120}, "Converter")
+regR("r_RawQuartz(Bauxite)", {"Reanimated SAM":10, "Bauxite":100}, {"Raw Quartz":120}, "Converter")
+regR("r_RawQuartz(Coal)", {"Reanimated SAM":10, "Coal":240}, {"Raw Quartz":120}, "Converter")
+regR("r_Sulfur(Coal)", {"Reanimated SAM":10, "Coal":200}, {"Sulfur":120}, "Converter")
+regR("r_Sulfur(Iron)", {"Reanimated SAM":10, "Iron Ore":300}, {"Sulfur":120}, "Converter")
+regR("r_TimeCrystal", {"Diamonds":12}, {"Time Crystal":6}, "Converter")
+regR("r_UraniumOre(Bauxite)", {"Reanimated SAM":10, "Bauxite":480}, {"Uranium":120}, "Converter")
+
+# ---- T9 Quantum Encoding ----
+regR("r_AIExpansionServer", {"Magnetic Field Generator":4, "Neural-Quantum Processor":4, "Superposition Oscillator":4, "Excited Photonic Matter":100}, {"AI Expansion Server":4, "Dark Matter Residue":100}, "Quantum Encoder")
+regR("r_DarkMatterCrystal", {"Diamonds":30, "Dark Matter Residue":150}, {"Dark Matter Crystal":30}, "Particle Accelerator 1000")
+regR("r_DarkMatterResidue", {"Reanimated SAM":50}, {"Dark Matter Residue":100}, "Converter")
+regR("r_ExcitedPhotonicMatter", {}, {"Excited Photonic Matter":200}, "Converter")
+regR("r_Neural-QuantumProcessor", {"Time Crystal":15, "Supercomputer":3, "Ficsite Trigon":45, "Excited Photonic Matter":75}, {"Neural-Quantum Processor":3, "Dark Matter Residue":75}, "Quantum Encoder")
+regR("r_SuperpositionOscillator", {"Dark Matter Crystal":30, "Crystal Oscillator":5, "Alclad Aluminum Sheet":45, "Excited Photonic Matter":125}, {"Superposition Oscillator":5, "Dark Matter Residue":125}, "Quantum Encoder")
+
+# ---- T9 Spatial Energy Regulation ----
+regR("r_BallisticWarpDrive", {"Thermal Propulsion Rocket":1, "Singularity Cell":5, "Superposition Oscillator":2, "Dark Matter Crystal":40}, {"Ballistic Warp Drive":1}, "Manufacturer")
+regR("r_SingularityCell", {"Nuclear Pasta":1, "Dark Matter Crystal":20, "Iron Plate":100, "Concrete":200}, {"Singularity Cell":10}, "Manufacturer")
+
+# ---- T9 Peak Efficiency ----
+regR("r_Ficsonium", {"Plutonium Waste":10, "Singularity Cell":10, "Dark Matter Residue":200}, {"Ficsonium":10}, "Particle Accelerator 1000")
+regR("r_FicsoniumFuelRod", {"Ficsonium":5, "Electromagnetic Control Rod":5, "Ficsite Trigon":100, "Excited Photonic Matter":50}, {"Ficsonium Fuel Rod":2.5, "Dark Matter Residue":50}, "Quantum Encoder")
+
 
 # ---- MAM Alien Organisms ----
-# regR("r_Biomass(AlienCarapace)", {"Alien Carapace":15}, {"Biomass":1500}, "Constructor")
-# regR("r_Biomass(AlienOrgans)", {"Alien Organs":7.5}, {"Biomass":1500}, "Constructor")
-regR("r_SpikedRebar", {"Iron Rod":15}, {"Spiked Rebar":15}, "Constructor")
+# regR("r_HatcherProtein", {"Hatcher Remains":20}, {"Alien Protein":20}, "Constructor")
+# regR("r_HogProtein", {"Hog Remains":20}, {"Alien Protein":20}, "Constructor")
+# regR("r_SplitterProtein", {"Splitter Remains":20}, {"Alien Protein":20}, "Constructor")
+# regR("r_StingerProtein", {"Stinger Remains":20}, {"Alien Protein":20}, "Constructor")
+# regR("r_Biomass(AlienProtein)", {"Alien Protein":15}, {"Biomass":1500}, "Constructor")
+regR("r_IronRebar", {"Iron Rod":15}, {"Iron Rebar":15}, "Constructor")
+# regR("r_AlienDNACapsule", {"Alien Protein":10}, {"Alien DNA Capsule":10}, "Constructor")
 
 # ---- MAM Caterium ----
 regR("r_CateriumIngot", {"Caterium Ore":45}, {"Caterium Ingot":15}, "Smelter")
 regR("r_Quickwire", {"Caterium Ingot":12}, {"Quickwire":60}, "Constructor")
 regR("r_AILimiter", {"Copper Sheet":25, "Quickwire":100}, {"AI Limiter":5}, "Assembler")
-regR("r_High-SpeedConnector", {"Quickwire":210, "Cable":37.5, "Circuit Board":3.75},{"High-Speed Connector":3.75}, "Manufacturer")
-regR("r_Supercomputer", {"Computer":3.75, "AI Limiter":3.75, "High-Speed Connector":5.625, "Plastic":52.5}, {"Supercomputer":1.875}, "Manufacturer")
+regR("r_High-SpeedConnector", {"Quickwire":210, "Cable":37.5, "Circuit Board":3.75}, {"High-Speed Connector":3.75}, "Manufacturer")
+regR("r_HomingRifleAmmo", {"Rifle Ammo":50, "High-Speed Connector":2.5}, {"Homing Rifle Ammo":25}, "Assembler")
+regR("r_StunRebar", {"Iron Rebar":10, "Quickwire":50}, {"Stun Rebar":10}, "Assembler")
 
-# ---- MAM Flower Petals or T2 Resource Sink Bonus Program ----
-# regR("r_ColorCartridge", {"Flower Petals":37.5}, {"Color Cartridge":75}, "Constructor")
 
 # ---- MAM Mycelia ----
-# regR("r_Biomass(Mycelia)", {"Mycelia":150}, {"Biomass":150}, "Constructor")
+# regR("r_Biomass(Mycelia)", {"Mycelia":15}, {"Biomass":150}, "Constructor")
 # regR("r_Fabric", {"Mycelia":15, "Biomass":75}, {"Fabric":15}, "Assembler")
+# regR("r_GasNobelisk", {"Nobelisk":5, "Biomass":50}, {"Gas Nobelisk":5}, "Assembler")
+
 
 # ---- MAM Power Slugs ----
 # regR("r_PowerShard(1)", {"Blue Power Slug":7.5}, {"Power Shard":7.5}, "Constructor")
 # regR("r_PowerShard(2)", {"Yellow Power Slug":5}, {"Power Shard":10}, "Constructor")
 # regR("r_PowerShard(5)", {"Purple Power Slug":2.5}, {"Power Shard":12.5}, "Constructor")
+regR("r_SyntheticPowerShard", {"Time Crystal":10, "Dark Matter Crystal":10, "Quartz Crystal":60, "Excited Photonic Matter":60}, {"Power Shard":5, "Dark Matter Residue":60}, "Quantum Encoder")
 
 # ---- MAM Quartz ----
 regR("r_QuartzCrystal", {"Raw Quartz":37.5}, {"Quartz Crystal":22.5}, "Constructor")
 regR("r_Silica", {"Raw Quartz":22.5}, {"Silica":37.5}, "Constructor")
-regR("r_CrystalOscillator", {"Quartz Crystal":18.75, "Rubber":13.125, "Reinforced Iron Plate":2.5}, {"Crystal Oscillator":1}, "Manufacturer")
+regR("r_CrystalOscillator", {"Quartz Crystal":18, "Cable":14, "Reinforced Iron Plate":2.5}, {"Crystal Oscillator":1}, "Manufacturer")
+regR("r_PulseNobelisk", {"Nobelisk":5, "Crystal Oscillator":1}, {"Pulse Nobelisk":5}, "Assembler")
+regR("r_ShatterRebar", {"Iron Rebar":10, "Quartz Crystal":15}, {"Shatter Rebar":5}, "Assembler")
+
 
 # ---- MAM Sulfur ----
-regR("r_BlackPowder", {"Coal":7.5, "Sulfur":15}, {"Black Powder":7.5}, "Assembler")
-regR("r_Nobelisk", {"Black Powder":15, "Steel Pipe":30}, {"Nobelisk":3}, "Assembler")
-regR("r_RifleCartridge", {"Beacon":3, "Steel Pipe":30, "Black Powder":30, "Rubber":30}, {"Rifle Cartridge":15}, "Manufacturer")
+regR("r_BlackPowder", {"Coal":15, "Sulfur":15}, {"Black Powder":30}, "Assembler")
+regR("r_Nobelisk", {"Black Powder":20, "Steel Pipe":20}, {"Nobelisk":10}, "Assembler")
+regR("r_ClusterNobelisk", {"Nobelisk":7.5, "Smokeless Powder":10}, {"Cluster Nobelisk":2.5}, "Assembler")
+regR("r_ExplosiveRebar", {"Iron Rebar":10, "Smokeless Powder":10, "Steel Pipe":10}, {"Explosive Rebar":5}, "Manufacturer")
+regR("r_IonizedFuel", {"Rocket Fuel":40, "Power Shard":2.5}, {"Ionized Fuel":40, "Compacted Coal":5}, "Refinery")
+regR("r_NukeNobelisk", {"Nobelisk":2.5, "Encased Uranium Cell":10, "Smokeless Powder":5, "AI Limiter":3}, {"Nuke Nobelisk":0.5}, "Manufacturer")
+regR("r_PackagedIonizedFuel", {"Ionized Fuel":80, "Empty Fluid Tank":40}, {"Packaged Ionized Fuel":40}, "Packager")
+regR("r_PackagedRocketFuel", {"Rocket Fuel":120, "Empty Fluid Tank":60}, {"Packaged Rocket Fuel":60}, "Packager")
+regR("r_RifleAmmo", {"Copper Sheet":15, "Smokeless Powder":10}, {"Rifle Ammo":75}, "Assembler")
+regR("r_RocketFuel", {"Turbofuel":60, "Nitric Acid":10}, {"Rocket Fuel":100, "Compacted Coal":10}, "Blender")
+regR("r_SmokelessPowder", {"Black Powder":20, "Heavy Oil Residue":10}, {"Smokeless Powder":20}, "Refinery")
+regR("r_TurboRifleAmmoB", {"Rifle Ammo":125, "Aluminum Casing":15, "Turbofuel":15}, {"Turbo Rifle Ammo":250}, "Blender")
+regR("r_TurboRifleAmmoM", {"Rifle Ammo":125, "Aluminum Casing":15, "Packaged Turbofuel":15}, {"Turbo Rifle Ammo":250}, "Manufacturer")
+regR("r_UnpackageIonizedFuel", {"Packaged Ionized Fuel":40}, {"Ionized Fuel":80, "Empty Fluid Tank":40}, "Packager")
+regR("r_UnpackageRocketFuel", {"Packaged Rocket Fuel":60}, {"Rocket Fuel":120, "Empty Fluid Tank":60}, "Packager")
+
+
+# ---- MAM SAM ----
+regR("r_ReanimatedSAM", {"SAM":120}, {"Reanimated SAM":30}, "Constructor")
+regR("r_SAMFluctuator", {"Reanimated SAM":60, "Wire":50, "Steel Pipe":30}, {"SAM Fluctuator":10}, "Manufacturer")
 
 
 # ----- alternate recipes -----
 # ---- T1 ----
-regR("a_IronWire", {"Iron Ingot":12.5},{"Wire":22.5},"Constructor")
-regR("a_CastScrew", {"Iron Ingot":12.5},{"Screw":50.0},"Constructor")
+regR("a_IronWire", {"Iron Ingot":12.5}, {"Wire":22.5}, "Constructor")
+regR("a_CastScrew", {"Iron Ingot":12.5}, {"Screw":50}, "Constructor")
 # -- + MAM --
-regR("a_CateriumWire", {"Caterium Ingot":15.0},{"Wire":120.0},"Constructor")
+regR("a_CateriumWire", {"Caterium Ingot":15}, {"Wire":120}, "Constructor")
 
 # ---- T2 ----
-regR("a_BoltedIronPlate",{"Iron Plate":90, "Screw":250},{"Reinforced Iron Plate":15},"Assembler")
-regR("a_StitchedIronPlate",{"Iron Plate":18.75, "Wire":37.5},{"Reinforced Iron Plate":5.625}, "Assembler")
+regR("a_BoltedIronPlate", {"Iron Plate":90, "Screw":250}, {"Reinforced Iron Plate":15}, "Assembler")
+regR("a_StitchedIronPlate", {"Iron Plate":18.75, "Wire":37.5}, {"Reinforced Iron Plate":5.625}, "Assembler")
 regR("a_BoltedFrame", {"Reinforced Iron Plate":7.5, "Screw":140}, {"Modular Frame":5}, "Assembler")
 regR("a_CopperRotor", {"Copper Sheet":22.5, "Screw":195}, {"Rotor":11.25}, "Assembler")
 # -- + MAM --
 regR("a_FusedWire", {"Copper Ingot":12, "Caterium Ingot":3}, {"Wire":90}, "Assembler")
-regR("a_FusedQuickwire", {"Copper Ingot":37.5, "Caterium Ingot":7.5}, {"Quickwire":90}, "Assembler")
-regR("a_CheapSilica", {"Raw Quartz":11.25, "Limestone":18.75}, {"Silica":26.25}, "Assembler")
-regR("a_FineConcrete", {"Silica":7.5, "Limestone":30}, {"Concrete":25}, "Assembler")
+regR("a_FusedQuickwire", {"Caterium Ingot":7.5, "Copper Ingot":37.5}, {"Quickwire":90}, "Assembler")
+regR("a_CheapSilica", {"Raw Quartz":22.5, "Limestone":37.5}, {"Silica":52.5}, "Assembler")
+regR("a_FineConcrete", {"Silica":15, "Limestone":60}, {"Concrete":50}, "Assembler")
 
 # ---- T3 Coal Power ----
-# regR("a_Biocoal", {"Biomass":37.5}, {"Coal":45}, "Assembler")
-# regR("a_Charcoal", {"Wood":15}, {"Coal":150}, "Assembler")
+# regR("a_Biocoal", {"Biomass":37.5}, {"Coal":45}, "Constructor")
+# regR("a_Charcoal", {"Wood":15}, {"Coal":150}, "Constructor")
 # -- + MAM --
 regR("a_CompactedCoal", {"Coal":25, "Sulfur":25}, {"Compacted Coal":25}, "Assembler")
-regR("a_FineBlackPowder", {"Sulfur":7.5, "Compacted Coal":3.75}, {"Black Powder":15}, "Assembler")
+regR("a_FineBlackPowder", {"Sulfur":7.5, "Compacted Coal":15}, {"Black Powder":45}, "Assembler")
 
 # ---- T3 Basic Steel Production ----
-regR("a_IronAlloyIngot", {"Iron Ore":20, "Copper Ore":20}, {"Iron Ingot":50}, "Foundry")
-regR("a_CopperAlloyIngot", {"Copper Ore":50, "Iron Ore":25}, {"Copper Ingot":100}, "Foundry")
+regR("a_IronAlloyIngot", {"Iron Ore":40, "Copper Ore":10}, {"Iron Ingot":75}, "Foundry")
+regR("a_CopperAlloyIngot", {"Copper Ore":50, "Iron Ore":50}, {"Copper Ingot":100}, "Foundry")
 regR("a_SolidSteelIngot", {"Iron Ingot":40, "Coal":40}, {"Steel Ingot":60}, "Foundry")
 regR("a_SteelRod", {"Steel Ingot":12}, {"Iron Rod":48}, "Constructor")
-regR("a_SteelScrew", {"Steel Beam":5},{"Screw":260}, "Constructor")
+regR("a_SteelScrew", {"Steel Beam":5}, {"Screw":260}, "Constructor")
 regR("a_SteeledFrame", {"Reinforced Iron Plate":2, "Steel Pipe":10}, {"Modular Frame":3}, "Assembler")
 regR("a_SteelRotor", {"Steel Pipe":10, "Wire":30}, {"Rotor":5}, "Assembler")
+regR("a_AutomatedMiner", {"Steel Pipe":4, "Iron Plate":4}, {"Portable Miner":1}, "Assembler")
+regR("a_BasicIronIngot", {"Iron Ore":25, "Limestone":40}, {"Iron Ingot":50}, "Foundry")
+regR("a_IronPipe", {"Iron Ingot":100}, {"Steel Pipe":25}, "Constructor")
+regR("a_MoldedBeam", {"Steel Ingot":120, "Concrete":80}, {"Steel Beam":45}, "Foundry")
+regR("a_MoldedSteelPipe", {"Steel Ingot":50, "Concrete":30}, {"Steel Pipe":50}, "Foundry")
+regR("a_SteelCastPlate", {"Iron Ingot":15, "Steel Ingot":15}, {"Iron Plate":45}, "Foundry")
 # -- + MAM --
-regR("a_CompactedSteelIngot", {"Iron Ore":22.5, "Compacted Coal":11.25}, {"Steel Ingot":37.5}, "Foundry")
+regR("a_CompactedSteelIngot", {"Iron Ore":5, "Compacted Coal":2.5}, {"Steel Ingot":10}, "Foundry")
+regR("a_FusedQuartzCrystal", {"Raw Quartz":75, "Coal":36}, {"Quartz Crystal":54}, "Foundry")
 
 # ---- T4 Advanced Steel Production ----
-regR("a_EncasedIndustrialPipe", {"Steel Pipe":28, "Concrete":20}, {"Encased Industrial Beam":4}, "Assembler")
+regR("a_EncasedIndustrialPipe", {"Steel Pipe":24, "Concrete":20}, {"Encased Industrial Beam":4}, "Assembler")
 # -- + MAM --
 regR("a_QuickwireStator", {"Steel Pipe":16, "Quickwire":60}, {"Stator":8}, "Assembler")
+regR("a_AutomatedSpeedWiring", {"Stator":3.75, "Wire":75, "High-Speed Connector":1.875}, {"Automated Wiring":7.5}, "Manufacturer")
 
 # ---- T5 Oil Processing ----
 regR("a_PureCopperIngot", {"Copper Ore":15, "Water":10}, {"Copper Ingot":37.5}, "Refinery")
 regR("a_SteamedCopperSheet", {"Copper Ingot":22.5, "Water":22.5}, {"Copper Sheet":22.5}, "Refinery")
-regR("a_WetConcrete", {"Limestone":120, "Water":100},{"Concrete":80}, "Refinery")
+regR("a_WetConcrete", {"Limestone":120, "Water":100}, {"Concrete":80}, "Refinery")
 regR("a_PureIronIngot", {"Iron Ore":35, "Water":20}, {"Iron Ingot":65}, "Refinery")
 regR("a_CoatedCable", {"Wire":37.5, "Heavy Oil Residue":15}, {"Cable":67.5}, "Refinery")
 regR("a_InsulatedCable", {"Wire":45, "Rubber":30}, {"Cable":100}, "Assembler")
-regR("a_ElectrodeCircuitBoard", {"Rubber":30, "Petroleum Coke":45}, {"Circuit Board":5}, "Assembler")
-regR("a_RubberConcrete", {"Limestone":50, "Rubber":10}, {"Concrete":45}, "Assembler")
+regR("a_ElectrodeCircuitBoard", {"Rubber":20, "Petroleum Coke":40}, {"Circuit Board":5}, "Assembler")
+regR("a_RubberConcrete", {"Limestone":100, "Rubber":20}, {"Concrete":90}, "Assembler")
 regR("a_HeavyOilResidue", {"Crude Oil":30}, {"Heavy Oil Residue":40, "Polymer Resin":20}, "Refinery")
-regR("a_CoatedIronPlate", {"Iron Ingot":50, "Plastic":10}, {"Iron Plate":75}, "Assembler")
+regR("a_CoatedIronPlate", {"Iron Ingot":37.5, "Plastic":7.5}, {"Iron Plate":75}, "Assembler")
 regR("a_SteelCoatedPlate", {"Steel Ingot":7.5, "Plastic":5}, {"Iron Plate":45}, "Assembler")
 regR("a_RecycledPlastic", {"Rubber":30, "Fuel":30}, {"Plastic":60}, "Refinery")
 regR("a_PolymerResin", {"Crude Oil":60}, {"Polymer Resin":130, "Heavy Oil Residue":20}, "Refinery")
 regR("a_AdheredIronPlate", {"Iron Plate":11.25, "Rubber":3.75}, {"Reinforced Iron Plate":3.75}, "Assembler")
 regR("a_RecycledRubber", {"Plastic":30, "Fuel":30}, {"Rubber":60}, "Refinery")
 regR("a_CokeSteelIngot", {"Iron Ore":75, "Petroleum Coke":75}, {"Steel Ingot":100}, "Foundry")
+regR("a_TemperedCateriumIngot", {"Caterium Ore":45, "Petroleum Coke":15}, {"Caterium Ingot":22.5}, "Foundry")
+regR("a_TemperedCopperIngot", {"Copper Ore":25, "Petroleum Coke":40}, {"Copper Ingot":60}, "Foundry")
+
 # -- + MAM --
 regR("a_PureCateriumIngot", {"Caterium Ore":24, "Water":24}, {"Caterium Ingot":12}, "Refinery")
 regR("a_PureQuartzCrystal", {"Raw Quartz":67.5, "Water":37.5}, {"Quartz Crystal":52.5}, "Refinery")
 regR("a_QuickwireCable", {"Quickwire":7.5, "Rubber":5}, {"Cable":27.5}, "Assembler")
 regR("a_CateriumCircuitBoard", {"Plastic":12.5, "Quickwire":37.5}, {"Circuit Board":8.75}, "Assembler")
-regR("a_PolyesterFabric", {"Polymer Resin":80, "Water":50}, {"Fabric":5}, "Refinery")
+regR("a_PolyesterFabric", {"Polymer Resin":30, "Water":30}, {"Fabric":30}, "Refinery")
 regR("a_SiliconCircuitBoard", {"Copper Sheet":27.5, "Silica":27.5}, {"Circuit Board":12.5}, "Assembler")
 regR("a_Turbofuel", {"Fuel":22.5, "Compacted Coal":15}, {"Turbofuel":18.75}, "Refinery")
 regR("a_TurboHeavyFuel", {"Heavy Oil Residue":37.5, "Compacted Coal":30}, {"Turbofuel":30}, "Refinery")
+regR("a_PlasticAILimiter", {"Quickwire":120, "Plastic":28}, {"AI Limiter":8}, "Assembler")
 
 # ---- T5 Alternative Fluid Transport ----
 regR("a_DilutedPackagedFuel", {"Heavy Oil Residue":30, "Packaged Water":60}, {"Packaged Fuel":60}, "Refinery")
 regR("a_CoatedIronCanister", {"Iron Plate":30, "Copper Sheet":15}, {"Empty Canister":60}, "Assembler")
-regR("a_SteelCanister", {"Steel Ingot":60}, {"Empty Canister":40}, "Constructor")
+regR("a_SteelCanister", {"Steel Ingot":40}, {"Empty Canister":40}, "Constructor")
 
 # ---- T5 Industrial Manufacturing ----
 regR("a_PlasticSmartPlating", {"Reinforced Iron Plate":2.5, "Rotor":2.5, "Plastic":7.5}, {"Smart Plating":5}, "Manufacturer")
 regR("a_FlexibleFramework", {"Modular Frame":3.75, "Steel Beam":22.5, "Rubber":30}, {"Versatile Framework":7.5}, "Manufacturer")
 regR("a_HeavyEncasedFrame", {"Modular Frame":7.5, "Encased Industrial Beam":9.375, "Steel Pipe":33.75, "Concrete":20.625}, {"Heavy Modular Frame":2.8125}, "Manufacturer")
 regR("a_HeavyFlexibleFrame", {"Modular Frame":18.75, "Encased Industrial Beam":11.25, "Rubber":75, "Screw":390}, {"Heavy Modular Frame":3.75}, "Manufacturer")
-regR("a_AutomatedMiner", {"Motor":1, "Steel Pipe":4, "Iron Rod":4, "Iron Plate":2}, {"Portable Miner":1}, "Manufacturer")
 # -- + MAM --
-regR("a_CrystalBeacon", {"Steel Beam":2, "Steel Pipe":8, "Crystal Oscillator":0.5}, {"Beacon":10}, "Manufacturer")
 regR("a_SiliconHigh-SpeedConnector", {"Quickwire":90, "Silica":37.5, "Circuit Board":3}, {"High-Speed Connector":3}, "Manufacturer")
 regR("a_InsulatedCrystalOscillator", {"Quartz Crystal":18.75, "Rubber":13.125, "AI Limiter":1.875}, {"Crystal Oscillator":1.875}, "Manufacturer")
 regR("a_SeismicNobelisk", {"Black Powder":12, "Steel Pipe":12, "Crystal Oscillator":1.5},  {"Nobelisk":6}, "Manufacturer")
-regR("a_High-SpeedWiring", {"Stator":3.75, "Wire":75, "High-Speed Connector":1.875}, {"Automated Wiring":7.5}, "Manufacturer")
 regR("a_RigourMotor", {"Rotor":3.75, "Stator":3.75, "Crystal Oscillator":1.25}, {"Motor":7.5}, "Manufacturer")
-regR("a_CateriumComputer", {"Circuit Board":26.25, "Quickwire":105, "Rubber":45}, {"Computer":3.75}, "Manufacturer")
-regR("a_CrystalComputer", {"Circuit Board":7.5, "Crystal Oscillator":2.8125}, {"Computer":2.8125}, "Manufacturer")
+regR("a_CateriumComputer", {"Circuit Board":15, "Quickwire":52.5, "Rubber":22.5}, {"Computer":3.75}, "Manufacturer")
+regR("a_CrystalComputer", {"Circuit Board":5, "Crystal Oscillator":5/3}, {"Computer":10/3}, "Assembler")
 
 # ---- T7 Bauxite Refinement ----
-regR("a_TurboBlendFuel", {"Fuel":15, "Heavy Oil Residue":30, "Sulfur":22.5, "Petroleum Coke":22.5}, {"Turbofuel":45}, "Blender")
 regR("a_SloppyAlumina", {"Bauxite":200, "Water":200}, {"Alumina Solution":240}, "Refinery")
 regR("a_AlcladCasing", {"Aluminum Ingot":150, "Copper Ingot":75}, {"Aluminum Casing":112.5}, "Assembler")
 regR("a_PureAluminumIngot", {"Aluminum Scrap":60}, {"Aluminum Ingot":30}, "Smelter")
-regR("a_Electrode-AluminumScrap", {"Alumina Solution":180, "Petroleum Coke":60}, {"Aluminum Scrap":300, "Water":105}, "Refinery")
+regR("a_ElectrodeAluminumScrap", {"Alumina Solution":180, "Petroleum Coke":60}, {"Aluminum Scrap":300, "Water":105}, "Refinery")
 regR("a_DilutedFuel", {"Heavy Oil Residue":50, "Water":100}, {"Fuel":100}, "Blender")
 regR("a_RadioControlSystem", {"Crystal Oscillator":1.5, "Circuit Board":15, "Aluminum Casing":90, "Rubber":45}, {"Radio Control Unit":4.5}, "Manufacturer")
-
+regR("a_AluminumBeam", {"Aluminum Ingot":22.5}, {"Steel Beam":22.5}, "Constructor")
+regR("a_AluminumRod", {"Aluminum Ingot":7.5}, {"Iron Rod":52.5}, "Constructor")
+# +MAM
+regR("a_NitroRocketFuel", {"Fuel":120, "Nitrogen Gas":90, "Sulfur":120, "Coal":60}, {"Rocket Fuel":180, "Compacted Coal":30}, "Blender")
 
 # ---- T7 Aeronautical Engineering ----
 regR("a_ClassicBattery", {"Sulfur":45, "Alclad Aluminum Sheet":52.5, "Plastic":60, "Wire":90}, {"Battery":30}, "Manufacturer")
 regR("a_InstantScrap", {"Bauxite":150, "Coal":100, "Sulfuric Acid":50, "Water":60}, {"Aluminum Scrap":300, "Water":50}, "Blender")
+regR("a_DistilledSilica", {"Dissolved Silica":120, "Limestone":50, "Water":100}, {"Silica":270, "Water":80}, "Blender")
+regR("a_LeachedCateriumIngot", {"Caterium Ore":54, "Sulfuric Acid":30}, {"Caterium Ingot":36}, "Refinery")
+regR("a_LeachedCopperIngot", {"Copper Ore":45, "Sulfuric Acid":25}, {"Copper Ingot":110}, "Refinery")
+regR("a_LeachedIronIngot", {"Iron Ore":50, "Sulfuric Acid":10}, {"Iron Ingot":100}, "Refinery")
+regR("a_QuartzPurification", {"Raw Quartz":120, "Nitric Acid":10}, {"Quartz Crystal":75, "Dissolved Silica":60}, "Refinery")
+regR("a_TurboBlendFuel", {"Fuel":15, "Heavy Oil Residue":30, "Sulfur":22.5, "Petroleum Coke":22.5}, {"Turbofuel":45}, "Blender")
 
 # ---- T8 Advanced Aluminum ----
-regR("a_OCSupercomputer", {"Radio Control Unit":9, "Cooling System":9}, {"Supercomputer":3}, "Assembler")
+regR("a_OCSupercomputer", {"Radio Control Unit":6, "Cooling System":6}, {"Supercomputer":3}, "Assembler")
 regR("a_RadioConnectionUnit", {"Heat Sink":15, "High-Speed Connector":7.5, "Quartz Crystal":45}, {"Radio Control Unit":3.75}, "Manufacturer")
-regR("a_CoolingDevice", {"Heat Sink":9.375, "Motor":1.875, "Nitrogen Gas":45}, {"Cooling System":3.75}, "Blender")
+regR("a_CoolingDevice", {"Heat Sink":10, "Motor":2.5, "Nitrogen Gas":60}, {"Cooling System":5}, "Blender")
 regR("a_HeatExchanger", {"Aluminum Casing":30, "Rubber":30}, {"Heat Sink":10}, "Assembler")
 
 # ---- T8 Nuclear Power ----
 regR("a_ElectricMotor", {"Electromagnetic Control Rod":3.75, "Rotor":7.5}, {"Motor":7.5}, "Assembler")
-regR("a_Super-StateComputer", {"Computer":3.6, "Electromagnetic Control Rod":2.4, "Battery":24, "Wire":54}, {"Supercomputer":2.4}, "Manufacturer")
+regR("a_Super-StateComputer", {"Computer":7.2, "Electromagnetic Control Rod":2.4, "Battery":24, "Wire":60}, {"Supercomputer":2.4}, "Manufacturer")
 # -- # MAM --
 regR("a_ElectromagneticConnectionRod", {"Stator":8, "High-Speed Connector":4}, {"Electromagnetic Control Rod":8}, "Assembler")
 regR("a_InfusedUraniumCell", {"Uranium":25, "Silica":15, "Sulfur":25, "Quickwire":75}, {"Encased Uranium Cell":20}, "Manufacturer")
-regR("a_UraniumFuelUnit", {"Encased Uranium Cell":20, "Electromagnetic Control Rod":2, "Crystal Oscillator":0.6, "Beacon":1.2}, {"Uranium Fuel Rod":0.6}, "Manufacturer")
+regR("a_UraniumFuelUnit", {"Encased Uranium Cell":20, "Electromagnetic Control Rod":2, "Crystal Oscillator":0.6, "Rotor":2}, {"Uranium Fuel Rod":0.6}, "Manufacturer")
 
 # ---- T8 Leading-edge ----
 regR("a_TurboElectricMotor", {"Motor":6.5625, "Radio Control Unit":8.4375, "Electromagnetic Control Rod":4.6875, "Rotor":6.5625}, {"Turbo Motor":2.8125}, "Manufacturer")
@@ -647,8 +724,20 @@ regR("a_TurboElectricMotor", {"Motor":6.5625, "Radio Control Unit":8.4375, "Elec
 regR("a_Heat-FusedFrame", {"Heavy Modular Frame":3, "Aluminum Ingot":150, "Nitric Acid":24, "Fuel":30}, {"Fused Modular Frame":3}, "Blender")
 regR("a_TurboPressureMotor", {"Motor":7.5, "Pressure Conversion Cube":1.875, "Packaged Nitrogen Gas":45, "Stator":15}, {"Turbo Motor":3.75}, "Manufacturer")
 regR("a_FertileUranium", {"Uranium":25, "Uranium Waste":25, "Nitric Acid":15, "Sulfuric Acid":25}, {"Non-fissile Uranium":100, "Water":40}, "Blender")
-regR("a_InstantPlutoniumCell", {"Non-fissile Uranium":75, "Aluminum Casing":10}, {"Encased Plutonium Cell":10}, "Particle Accelerator IPC")
+regR("a_InstantPlutoniumCell", {"Non-fissile Uranium":75, "Aluminum Casing":10}, {"Encased Plutonium Cell":10}, "Particle Accelerator 500")
 regR("a_PlutoniumFuelUnit", {"Encased Plutonium Cell":10, "Pressure Conversion Cube":0.5}, {"Plutonium Fuel Rod":0.5}, "Assembler")
+
+# ---- T9 Matter Conversion ----
+regR("a_CloudyDiamonds", {"Coal":240, "Limestone":480}, {"Diamonds":20}, "Particle Accelerator 500")
+regR("a_Oil-BasedDiamonds", {"Crude Oil":200}, {"Diamonds":40}, "Particle Accelerator 500")
+regR("a_PetroleumDiamonds", {"Petroleum Coke":720}, {"Diamonds":30}, "Particle Accelerator 500")
+regR("a_PinkDiamonds", {"Coal":120, "Quartz Crystal":45}, {"Diamonds":15}, "Converter")
+regR("a_TurboDiamonds", {"Coal":600, "Packaged Turbofuel":40}, {"Diamonds":60}, "Particle Accelerator 500")
+
+# ---- T9 Quantum Encoding ----
+regR("a_DarkMatterCrystallization", {"Dark Matter Residue":200}, {"Dark Matter Crystal":20}, "Particle Accelerator 1000")
+regR("a_DarkMatterTrap", {"Time Crystal":30, "Dark Matter Residue":150}, {"Dark Matter Crystal":60}, "Particle Accelerator 1000")
+regR("a_Dark-IonFuel", {"Packaged Rocket Fuel":240, "Dark Matter Crystal":80}, {"Ionized Fuel":200, "Compacted Coal":40}, "Converter")
 
 
 class MilestoneRecipe(Recipe):
@@ -679,10 +768,11 @@ def regMR(name: str, requirements: dict):
     return None
 
 # ----- Milestone recipes -----
-#regMR("ProjectAssembly1", {"Smart Plating":50})
-#regMR("ProjectAssembly2", {"Smart Plating":500, "Versatile Framework":500, "Automated Wiring":100})
-#regMR("ProjectAssembly3", {"Versatile Framework":2500, "Modular Engine":500, "Adaptive Control Unit":100})
-regMR("ProjectAssembly4", {"Assembly Director System":4, "Magnetic Field Generator":4, "Thermal Propulsion Rocket":1, "Nuclear Pasta":1})
+regMR("ProjectAssembly1", {"Smart Plating":1})
+regMR("ProjectAssembly2", {"Smart Plating":10, "Versatile Framework":10, "Automated Wiring":1})
+regMR("ProjectAssembly3", {"Versatile Framework":25, "Modular Engine":5, "Adaptive Control Unit":1})
+regMR("ProjectAssembly4", {"Assembly Director System":10, "Magnetic Field Generator":10, "Thermal Propulsion Rocket":5, "Nuclear Pasta":2})
+regMR("ProjectAssembly5", {"Nuclear Pasta":125, "Biochemical Sculptor":125, "AI Expansion Server":32, "Ballistic Warp Drive":25})
 #regMR("M01", {"Iron Rod":10})
 #regMR("M02", {"Iron Rod":20, "Iron Plate":10})
 
@@ -718,118 +808,141 @@ def regS(item: str, points: int):
 
 # ----- Sink items -----
 regS("Iron Ore",1)
-regS("Limestone",2)
 regS("Iron Ingot",2)
+regS("Limestone",2)
 regS("Screw",2)
 regS("Coal",3)
-#regS("Leaves",3)
 regS("Copper Ore",3)
+# regS("Leaves",3)
 regS("Iron Rod",4)
-regS("Iron Plate",6)
 regS("Copper Ingot",6)
+regS("Iron Plate",6)
 regS("Wire",6)
 regS("Caterium Ore",7)
-regS("Steel Ingot",8)
 regS("Bauxite",8)
-regS("Spiked Rebar",8)
-#regS("Color Cartridge",10)
-#regS("Flower Petals",10)
-#regS("Mycelia",10)
+regS("Iron Rebar",8)
+regS("Steel Ingot",8)
+# regS("Mycelia",10)
 regS("Sulfur",11)
-regS("Polymer Resin",12)
-#regS("Biomass",12)
+# regS("Biomass",12)
 regS("Concrete",12)
+regS("Polymer Resin",12)
+regS("Black Powder",14)
 regS("Raw Quartz",15)
 regS("Quickwire",17)
 regS("Petroleum Coke",20)
+regS("SAM",20)
 regS("Silica",20)
-regS("Steel Pipe",24)
 regS("Cable",24)
 regS("Copper Sheet",24)
+regS("Steel Pipe",24)
+regS("Rifle Ammo",25)
 regS("Aluminum Scrap",27)
 regS("Compacted Coal",28)
-#regS("Wood",30)
+# regS("Wood",30)
 regS("Uranium",35)
 regS("Caterium Ingot",42)
-#regS("Solid Biofuel",48)
-regS("Black Powder",50)
+# regS("Solid Biofuel",48)
 regS("Quartz Crystal",50)
+regS("Portable Miner",56)
+regS("Smokeless Powder",58)
 regS("Empty Canister",60)
-regS("Portable Miner",60)
 regS("Rubber",60)
 regS("Steel Beam",64)
-#regS("Medicinal Inhaler",67)
 regS("Copper Powder",72)
 regS("Plastic",75)
 regS("Reinforced Iron Plate",120)
+regS("Turbo Rifle Ammo",120)
+# regS("Medicinal Inhaler",125)
 regS("Packaged Water",130)
 regS("Aluminum Ingot",131)
 regS("Fabric",140)
 regS("Rotor",140)
 regS("Encased Uranium Cell",147)
+regS("Nobelisk",152)
 regS("Packaged Sulfuric Acid",152)
 regS("Packaged Alumina Solution",160)
-regS("Packaged Oil",180)
+regS("Reanimated SAM",160)
+regS("Empty Fluid Tank",170)
 regS("Packaged Heavy Oil Residue",180)
-regS("Empty Fluid Tank",225)
+regS("Packaged Oil",180)
+regS("Stun Rebar",186)
+regS("Diamonds",240)
 regS("Stator",240)
 regS("Alclad Aluminum Sheet",266)
 regS("Packaged Fuel",270)
 regS("Packaged Nitrogen Gas",312)
-regS("Beacon",320)
-#regS("Packaged Liquid Biofuel",370)
+regS("Shatter Rebar",332)
+regS("Explosive Rebar",360)
+# regS("Packaged Liquid Biofuel",370)
 regS("Aluminum Casing",393)
 regS("Modular Frame",408)
 regS("Packaged Nitric Acid",412)
 regS("Battery",465)
 regS("Smart Plating",520)
+regS("Encased Industrial Beam",528)
+regS("Gas Nobelisk",544)
 regS("Packaged Turbofuel",570)
-#regS("Parachute",608)
-regS("Encased Industrial Beam",632)
-regS("Rifle Cartridge",664)
+regS("Gas Filter",608)
 regS("Circuit Board",696)
-regS("Gas Filter",830)
-#regS("Color Gun",860)
+regS("Homing Rifle Ammo",855)
 regS("AI Limiter",920)
-regS("Nobelisk",980)
+regS("Time Crystal",960)
+regS("Packaged Rocket Fuel",1028)
 regS("Versatile Framework",1176)
+regS("Ficsite Trigon",1291)
+regS("Cluster Nobelisk",1376)
+# regS("Object Scanner",1400)
 regS("Automated Wiring",1440)
 regS("Motor",1520)
-#regS("Factory Cart",1552)
-#regS("Xeno-Zapper",1880)
-#regS("Rebar Gun",1968)
+regS("Pulse Nobelisk",1533)
+# regS("Factory Cart",1552)
+regS("Dark Matter Crystal",1780)
+# regS("Golden Factory Cart",1852)
+# regS("Xeno-Zapper",1880)
+regS("Ficsite Ingot",1936)
+# regS("Rebar Gun",1968)
+regS("SAM Fluctuator",1968)
+regS("Iodine-Infused Filter",2274)
 regS("Electromagnetic Control Rod",2560)
-regS("Iodine Infused Filter",2718)
-#regS("Chainsaw",2760)
+# regS("Chainsaw",2760)
 regS("Heat Sink",2804)
 regS("Crystal Oscillator",3072)
-#regS("Object Scanner",3080)
 regS("High-Speed Connector",3776)
-#regS("Blade Runners",4988)
-#regS("Zipline",5284)
+# regS("Blade Runners",4088)
+regS("Packaged Ionized Fuel",5246)
+# regS("Zipline",5284)
+regS("Parachute",6080)
+regS("Nobelisk Detonator",6480)
+regS("Computer",8352)
+# regS("Rifle",9480)
 regS("Modular Engine",9960)
-regS("Heavy Modular Frame",11520)
+regS("Heavy Modular Frame",10800)
+regS("Magnetic Field Generator",11000)
 regS("Cooling System",12006)
-regS("Magnetic Field Generator",15650)
-regS("Computer",17260)
-#regS("Xeno-Basher",18800)
-regS("Radio Control Unit",32908)
-#regS("Jetpack",35580)
-#regS("Nobelisk Detonator",39520)
-regS("Uranium Fuel Rod",44092)
-#regS("Hazmat Suit",54100)
-#regS("Gas Mask",55000)
+# regS("Gas Mask",14960)
+# regS("Jetpack",16580)
+# regS("Xeno-Basher",17800)
+regS("Nuke Nobelisk",19600)
+regS("Radio Control Unit",32352)
+regS("Superposition Oscillator",37292)
+regS("Uranium Fuel Rod",43468)
+# regS("Hazmat Suit",54100)
 regS("Fused Modular Frame",62840)
-regS("Adaptive Control Unit",86120)
-#regS("Rifle",99160)
-regS("Supercomputer",99576)
+regS("Adaptive Control Unit",76368)
+regS("Supercomputer",97352)
+regS("Singularity Cell",114675)
 regS("Plutonium Fuel Rod",153184)
-regS("Turbo Motor",242720)
-regS("Pressure Conversion Cube",257312)
-#regS("Hover Pack",413920)
-regS("Nuclear Pasta",543424)
-regS("Assembly Director System",543632)
-regS("Thermal Propulsion Rocket",732956)
+regS("Turbo Motor",240496)
+regS("Neural-Quantum Processor",248034)
+regS("Pressure Conversion Cube",255088)
+# regS("Hover Pack",265632)
+regS("Biochemical Sculptor",301778)
+regS("Assembly Director System",500176)
+regS("Nuclear Pasta",538976)
+regS("AI Expansion Server",597652)
+regS("Thermal Propulsion Rocket",728508)
+regS("Ballistic Warp Drive",2895334)
 
 np.set_printoptions(precision=2, suppress=True)
 solver_options = {'autoscale':True}
@@ -1062,150 +1175,3 @@ def shadowprices(target, **kwargs):
     v_items = dict((Items[i], v_items[i]) for i in range(len(Items)))
     v_items = dict((y, v_items[y]) for y in sorted(v_items))
     return [v_power, v_nodes, v_items]
-
-# ---- checking Zistack
-bc = dict()
-bc['pump_Water'] = 1535.03
-bc['r_Cable'] = 83.64
-bc ['r_Concrete'] = 88.73
-bc['a_IronWire'] = 4693.93
-bc['r_Screw'] = 5595.64
-bc['r_SteelPipe'] = 1897.86
-bc['a_SteelRod'] = 1478.03
-bc['a_AdheredIronPlate'] = 42.82
-bc['r_AILimiter'] = 618.08
-bc['a_AlcladCasing'] = 86.93
-bc['r_AssemblyDirectorSystem'] = 26.76
-bc['r_AutomatedWiring'] = 120.43
-bc['a_CheapSilica'] = 702.04
-bc['r_CircuitBoard'] = 307.59
-bc['a_CompactedCoal'] = 165.83
-bc['a_CopperRotor'] = 760.56
-bc['r_ElectromagneticControlRod'] = 711.97
-bc['a_EncasedIndustrialPipe'] = 33.45
-bc['a_FusedQuickwire'] = 736
-bc['a_InsulatedCable'] = 43.92
-bc['r_ModularFrame'] = 53.52
-bc['r_Motor'] = 760.66
-bc['r_Rotor'] = 713.39
-bc['a_SiliconCircuitBoard'] = 30.94
-bc['r_Stator'] = 2435.92
-bc['a_SteelCoatedPlate'] = 15.95
-bc['r_AdaptiveControlUnit'] = 40.14
-bc['r_Beacon'] = 10.49
-bc['r_Computer'] = 32.11
-bc['a_HeavyEncasedFrame'] = 14.27
-bc['a_InfusedUraniumCell'] = 34.99
-bc['a_InsulatedCrystalOscillator'] = 107.93
-bc['a_RadioControlSystem'] = 108.66
-bc['a_SiliconHigh-SpeedConnector'] = 20.07
-bc['r_Supercomputer'] = 10.7
-bc['a_TurboElectricMotor'] = 579.55
-bc['a_UraniumFuelUnit'] = 65.62
-bc['a_Electrode-AluminumScrap'] = 65.2
-bc['a_HeavyOilResidue'] = 390
-bc['r_PetroleumCoke'] = 179.2
-bc['a_PureCateriumIngot'] = 460
-bc['a_PureCopperIngot'] = 1924
-bc['a_PureIronIngot'] = 1302.28
-bc['a_PureQuartzCrystal'] = 38.54
-bc['a_RecycledPlastic'] = 272.93
-bc['a_RecycledRubber'] = 168.71
-bc['r_ResidualRubber'] = 292.5
-bc['a_SloppyAlumina'] = 48.9
-bc['a_SteamedCopperSheet'] = 1690.22
-bc['r_SulfuricAcid'] = 14.7
-bc['a_DilutedFuel'] = 139.72
-bc['r_EncasedUraniumCell'] = 24.5
-bc['a_TurboBlendFuel'] = 48.18
-bc['r_AluminumIngot'] = 217.33
-bc['a_CokeSteelIngot'] = 220.11
-bc['a_CompactedSteelIngot'] = 368.51
-bc['a_SolidSteelIngot'] = 649.35
-bc['power_Turbofuel'] = 481.85
-bc['power_UraniumFuelRod'] = 196.87
-bc['sink_Limestone'] = 45.77
-bc['sink_TurboMotor'] = 2.08
-bc['sink_AssemblyDirectorSystem'] = 0.02
-
-eu = dict()
-eu['pump_Water'] = 1620.73
-eu['r_AluminumCasing'] = 18.81
-eu['r_Cable'] = 1928.62
-eu['r_Concrete'] = 747.82
-eu['r_CopperPowder'] = 186.85
-eu['a_IronWire'] = 6970.97
-eu['r_Quickwire'] = 294.11
-eu['r_Screw'] = 721.81
-eu['r_SteelBeam'] = 93.42
-eu['r_SteelPipe'] = 1422.52
-eu['a_SteelRod'] = 420.17
-eu['a_AdheredIronPlate'] = 637.62
-eu['r_AILimiter'] = 11.04
-eu['r_AlcladAluminumSheet'] = 132.74
-eu['a_AlcladCasing'] = 13.32
-eu['r_AssemblyDirectorSystem'] = 249.13
-eu['r_AutomatedWiring'] = 1121.10
-eu['a_CateriumCircuitBoard'] = 598.05
-eu['a_CheapSilica'] = 870.21
-eu['a_CompactedCoal'] = 79.26
-eu['a_ElectromagneticConnectionRod'] = 60.09
-eu['a_EncasedIndustrialPipe'] = 400.82
-eu['r_EncasedPlutoniumCell'] = 55.48
-eu['a_FusedQuickwire'] = 265.41
-eu['a_HeatExchanger'] = 59.65
-eu['r_ModularFrame'] = 758.10
-eu['r_Motor'] = 48.49
-eu['a_OCSupercomputer'] = 17.57
-eu['a_PlutoniumFuelUnit'] = 27.74
-eu['r_PressureConversionCube'] = 60.58
-eu['r_Rotor'] = 190.19
-eu['a_SiliconCircuitBoard'] = 128.67
-eu['r_Stator'] = 763.69
-eu['a_SteelCoatedPlate'] = 171.09
-eu['r_AdaptiveControlUnit'] = 373.70
-eu['r_Beacon'] = 6.55
-eu['a_CateriumComputer'] = 102.77
-eu['a_ClassicBattery'] = 75.85
-eu['r_Computer'] = 75.79
-eu['a_FlexibleFramework'] = 62.28
-eu['a_HeavyEncasedFrame'] = 171.02
-eu['a_InsulatedCrystalOscillator'] = 29.45
-eu['r_MagneticFieldGenerator'] = 186.85
-eu['r_ModularEngine'] = 116.78
-eu['a_PlasticSmartPlating'] = 46.71
-eu['a_RadioControlSystem'] = 9.32
-eu['a_RigourMotor'] = 13.34
-eu['a_SiliconHigh-SpeedConnector'] = 80.12
-eu['a_Super-StateComputer'] = 55.89
-eu['r_ThermalPropulsionRocket'] = 46.71
-eu['a_TurboElectricMotor'] = 16.60
-eu['a_UraniumFuelUnit'] = 40.94
-eu['a_Electrode-AluminumScrap'] = 65.2
-eu['a_HeavyOilResidue'] = 390
-eu['r_PetroleumCoke'] = 68.81
-eu['a_PureCateriumIngot'] = 460
-eu['a_PureCopperIngot'] = 1924
-eu['a_PureIronIngot'] = 1773.47
-eu['a_PureQuartzCrystal'] = 10.51
-eu['a_RecycledPlastic'] = 458.5
-eu['a_RecycledRubber'] = 362.23
-eu['r_ResidualRubber'] = 292.5
-eu['a_SloppyAlumina'] = 48.9
-eu['a_SteamedCopperSheet'] = 169.54
-eu['r_SulfuricAcid'] = 28.89
-eu['a_WetConcrete'] = 24.09
-eu['r_CoolingSystem'] = 49.71
-eu['a_DilutedFuel'] = 256.95
-eu['r_EncasedUraniumCell'] = 32.75
-eu['a_FertileUranium'] = 18.49
-eu['a_Heat-FusedFrame'] = 35.76
-eu['r_NitricAcid'] = 37.85
-eu['r_NuclearPasta'] = 93.42
-eu['r_PlutoniumPellet'] = 18.49
-eu['r_AluminumIngot'] = 217.33
-eu['a_CokeSteelIngot'] = 57.93
-eu['a_CompactedSteelIngot'] = 176.14
-eu['a_SolidSteelIngot'] = 703.45
-eu['power_PlutoniumFuelRod'] = 138.7
-eu['power_UraniumFuelRod'] = 122.82
