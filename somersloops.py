@@ -56,3 +56,64 @@ def bruteforce_M2(I, O, maxS, maxN):
 def power(N, C):
     m = len(N) - 1
     return sum(N[i] * (1+i/m)**2 * C[i]**e for i in range(m+1))
+
+def power2(Np, N, I):
+    m = len(Np)
+    n0 = N - sum(Np)
+    c0 = (I - 2.5*(N-n0))/n0
+    return n0 * c0**e + 2.5**e * sum(Np[i] * (1+(i+1)/m)**2 for i in range(m))
+
+def relaxed(N, I, S, m):
+    res = minimize(power2, [S,]+[0,]*(m-1), args=(N, I), bounds=Bounds(lb=0, ub=N), constraints=[{"type":"eq", "fun":lambda x : sum((i+1)*x[i] for i in range(len(x)))-S},{"type":"ineq", "fun":lambda x:min(N,I/2.5)-sum(x)}])
+    assert res.success
+    n0 = N - sum(res.x)
+    c0 = 2.5 - (2.5*N-I)/n0
+    return [c0,n0,]+list(res.x)
+
+def brute(N, I, S, m):
+    best = None
+    match m:
+        case 2:
+            for n2 in range(min(N,S//2)+1):
+                n1 = S - 2*n2
+                if n1<0:
+                    continue
+                n0 = N - n2 - n1
+                if n0<0 or (n0==0 and 2*I!=5*N):
+                    continue
+                if n0>0:
+                    c0 = 2.5 - (2.5*N - I)/n0
+                else:
+                    c0 = 1.0
+                if c0 < 0.01 or c0 > 2.5:
+                    continue
+                P = power2((n1,n2),N,I)
+                if best is None or P < best[0]:
+                    best = [P, c0, n0, n1, n2]
+        case 4:
+            for n4 in range(min(N,S//4)+1):
+                S4 = S - 4*n4
+                N4 = N - n4
+                I4 = I - 2.5*n4
+                for n3 in range(min(N4, S4//3, I4//2.5)+1):
+                    S3 = S4 - 3*n3
+                    N3 = N4 - n3
+                    I3 = I4 - 2.5*n3
+                    for n2 in range(min(N3, S3//2, I3//2.5)+1):
+                        S2 = S3 - 2*n2
+                        N2 = N3 - n2
+                        I2 = I3 - 2.5*n2
+                        n1 = S2
+                        n0 = N2 - n1
+                        if n0<0 or (n0==0 and I2!=2.5*n1):
+                            continue
+                        if n0>0:
+                            c0 = 2.5 - (2.5*N - I)/n0
+                        else:
+                            c0 = 1.0
+                        if c0 < 0.01 or c0 > 2.5:
+                            continue
+                        P = power2((n1,n2,n3,n4),N,I)
+                        if best is None or P<best[0]:
+                            best = [P,c0,n0,n1,n2,n3,n4]
+    return best
