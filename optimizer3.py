@@ -36,7 +36,7 @@ PipeMK = 2  # 1 or 2
 GeysersOccupied = (9, 13, 9)  # impure, normal, pure
 FreeExtraPower = 0.0  # not including Geysers
 PumpsPerPipe = 0.0  # 1 per mk1 + 2 per mk2
-ExtractClockSteps = 100 # extractor's clock speed domain is divded in this many points. more: greater accuracy and computational expense
+ExtractClockSteps = 800 # extractor's clock speed domain is divded in this many points. more: greater accuracy and computational expense
 MinClock = 0.01
 
 MinerBasePower = {1: 5, 2: 12, 3: 30}

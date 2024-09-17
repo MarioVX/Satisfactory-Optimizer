@@ -34,7 +34,7 @@ MinerMK = 3  # 1 to 3
 BeltMK = 6  # 1 to 6
 PipeMK = 2  # 1 or 2
 GeysersOccupied = (9, 13, 9)  # impure, normal, pure
-FreeExtraPower = 0.0  # not including Geysers
+FreeExtraPower = -125.9863872  # not including Geysers. -125.9863872 for Water Wells.
 TotalSomersloops = 104
 PumpsPerPipe = 0.0  # 1 per mk1 + 2 per mk2
 ExtractClockSteps = 800 # extractor's clock speed domain from 1% to max is divded in this many points. more: greater accuracy and computational expense
@@ -47,7 +47,10 @@ PipeCapacity = {1: 300, 2: 600}
 GeothermalBasePower = 100.0 # on impure Geysir
 
 def FreePower(unfueled_APAs: int, fueled_APAs: int):
-    return (sum(GeysersOccupied[i] * GeothermalBasePower * 2**i for i in range(3)) + FreeExtraPower + 500 * (unfueled_APAs + fueled_APAs)) * (1 + (unfueled_APAs + 3 * fueled_APAs)/10)
+    if FreeExtraPower >= 0:
+        return (sum(GeysersOccupied[i] * GeothermalBasePower * 2**i for i in range(3)) + FreeExtraPower + 500 * (unfueled_APAs + fueled_APAs)) * (1 + (unfueled_APAs + 3 * fueled_APAs)/10)
+    else:
+        return (sum(GeysersOccupied[i] * GeothermalBasePower * 2**i for i in range(3)) + 500 * (unfueled_APAs + fueled_APAs)) * (1 + (unfueled_APAs + 3 * fueled_APAs)/10) + FreeExtraPower
 
 RecipesByName = dict()
 Recipes = list()
@@ -336,7 +339,7 @@ regER("Coal", "Miner")
 regER("Crude Oil", "Oil Extractor")
 regER("Bauxite", "Miner")
 regER("Uranium", "Miner")
-regER("Water", "Resource Well Pressurizer")
+# regER("Water", "Resource Well Pressurizer")
 regER("Crude Oil", "Resource Well Pressurizer")
 regER("Nitrogen Gas", "Resource Well Pressurizer")
 regER("SAM", "Miner")
@@ -1047,6 +1050,7 @@ def solve_sub(target: str, unfueled_APAs: int, fueled_APAs: int, penalty=0.0, ou
     A_eq = np.zeros((len(Items),len(Recipes)))
     b_eq = np.zeros(len(Items))
     b_eq[Items.index("Alien Power Matrix")] = -5.0 * fueled_APAs
+    b_eq[Items.index("Water")] = 999.26898 # 999.26898 m3/min from Water Wells
     for i in range(len(Recipes)):
         rec = Recipes[i]
         for item in rec.inputs.keys() | rec.outputs.keys():
