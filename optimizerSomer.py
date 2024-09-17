@@ -26,6 +26,7 @@ optimal clock speed assignments and their total power cost.
 """
 import numpy as np
 from scipy.optimize import linprog
+from math import log
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -45,6 +46,7 @@ MinerBaseSpeed = np.array([[30, 60, 120], [60, 120, 240], [120, 240, 480]])
 BeltCapacity = {1: 60, 2: 120, 3: 270, 4: 480, 5: 780, 6: 1200}
 PipeCapacity = {1: 300, 2: 600}
 GeothermalBasePower = 100.0 # on impure Geysir
+ProcPowerExponent = log(2.5, 2)
 
 def FreePower(unfueled_APAs: int, fueled_APAs: int):
     if FreeExtraPower >= 0:
@@ -61,7 +63,7 @@ ExtractBuildings = dict()
 
 
 class Building:
-    def __init__(self, Name: str, PowerBase: float, PowerExponent=1.321928, SomersloopSlots=0):
+    def __init__(self, Name: str, PowerBase: float, PowerExponent=ProcPowerExponent, SomersloopSlots=0):
         self.name = Name
         self._base = PowerBase
         self._exponent = PowerExponent
@@ -108,7 +110,7 @@ class WaterExtractor(Building):
     def __init__(self):
         self.name = "Water Extractor"
         self._base = 20.0
-        self._exponent = 1.321928
+        self._exponent = ProcPowerExponent
         self.sloots = 0
     
     def power(self, clock=1.0, sloops=None) -> float:
@@ -279,7 +281,7 @@ class ExtractRecipe(Recipe):
     def power(self) -> float:
         if self.building == "Miner":
             self._basePower = MinerBasePower[MinerMK]
-        return self._basePower * self.clock**1.321928
+        return self._basePower * self.clock**ProcPowerExponent
     
     def rate(self, item: str) -> float:
         if item != self.resource:
@@ -1160,17 +1162,17 @@ def nlextract(resource: str, quota: float, minclock=0.0):
             if i == j:
                 if q == 0.0:
                     sol = tuple(x[5] for x in methods[:i]) + tuple(minclock for _ in methods[j:])
-                    solutions[sol] = sum(methods[k][2]*methods[k][4]*sol[k]**1.321928 for k in range(len(methods)))
+                    solutions[sol] = sum(methods[k][2]*methods[k][4]*sol[k]**ProcPowerExponent for k in range(len(methods)))
             elif q >= 0.0:
-                lam = q / sum(x[2] * x[3]**(1+1/(1.321928-1)) * x[4]**(-1/(1.321928-1)) for x in methods[i:j])
-                sol = tuple(x[5] for x in methods[:i]) + tuple(lam * (methods[k][3]/methods[k][4])**(1/(1.321928-1)) for k in range(i,j)) + tuple(minclock for _ in methods[j:])
+                lam = q / sum(x[2] * x[3]**(1+1/(ProcPowerExponent-1)) * x[4]**(-1/(ProcPowerExponent-1)) for x in methods[i:j])
+                sol = tuple(x[5] for x in methods[:i]) + tuple(lam * (methods[k][3]/methods[k][4])**(1/(ProcPowerExponent-1)) for k in range(i,j)) + tuple(minclock for _ in methods[j:])
                 assert len(sol) == len(methods)
                 valid = True
                 for k in range(len(methods)):
                     if sol[k] > methods[k][5] or sol[k] < minclock:
                         valid = False
                 if valid:
-                    solutions[sol] = sum(methods[k][2]*methods[k][4]*sol[k]**1.321928 for k in range(len(methods)))
+                    solutions[sol] = sum(methods[k][2]*methods[k][4]*sol[k]**ProcPowerExponent for k in range(len(methods)))
     best = min(solutions, key= lambda x: solutions[x])
     outp = dict()
     for k in range(len(methods)):
