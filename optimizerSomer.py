@@ -38,7 +38,7 @@ GeysersOccupied = (9, 13, 9)  # impure, normal, pure
 FreeExtraPower = -125.9863872  # not including Geysers. -125.9863872 for Water Wells.
 TotalSomersloops = 104
 PumpsPerPipe = 0.0  # 1 per mk1 + 2 per mk2
-ExtractClockSteps = 800 # extractor's clock speed domain from 1% to max is divded in this many points. more: greater accuracy and computational expense
+ExtractClockSteps = 100 # extractor's clock speed domain from 1% to max is divded in this many points. more: greater accuracy and computational expense
 SloopClockSteps = 2 # overslooped clock speed domain from 100% to 250% is divided in this many points.
 
 MinerBasePower = {1: 5, 2: 12, 3: 30}
