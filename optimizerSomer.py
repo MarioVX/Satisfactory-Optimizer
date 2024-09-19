@@ -1004,7 +1004,7 @@ regS("Ballistic Warp Drive",2895334)
 np.set_printoptions(precision=2, suppress=True)
 solver_options = {'autoscale':True}
 # ----- solving -----
-def solve_sub(target: str, unfueled_APAs: int, fueled_APAs: int, penalty=0.0, outputMatrices=False, buildlimit=None):
+def solve_sub(target: str, unfueled_APAs: int, fueled_APAs: int, item_offsets=dict(), penalty=0.0, outputMatrices=False, buildlimit=None):
     # goal
     c = np.zeros(len(Recipes))
     if target == "AWESOME points" or target in Items:
@@ -1053,6 +1053,8 @@ def solve_sub(target: str, unfueled_APAs: int, fueled_APAs: int, penalty=0.0, ou
     b_eq = np.zeros(len(Items))
     b_eq[Items.index("Alien Power Matrix")] = -5.0 * fueled_APAs
     b_eq[Items.index("Water")] = 999.26898 # 999.26898 m3/min from Water Wells
+    for item in item_offsets:
+        b_eq[Items.index(item)] += item_offsets[item]
     for i in range(len(Recipes)):
         rec = Recipes[i]
         for item in rec.inputs.keys() | rec.outputs.keys():
@@ -1203,53 +1205,76 @@ def nlextract(resource: str, quota: float, minclock=0.0):
         outp[key] = methods[k][2]
     return [dict((x,outp[x]) for x in sorted(outp)), solutions[best]]
 
-def shadowprices(target, **kwargs):
-    sol = solve(target, outputMatrices=True, **kwargs)
-    # n_vars = len(sol['x'])
-    n_ineqs = len(sol['b_ub'])
-    n_eqs = np.shape(sol['A_eq'])[0]
-    b = (-1) * np.hstack([sol['b_ub'],np.zeros(n_eqs)])
-    A = np.vstack([sol['A_ub'], sol['A_eq']]).T
-    c = sol['c']
-    # print("-b:")
-    # print(b)
-    # print("-A:")
-    # print(A)
-    # print("-c:")
-    # print(c)
-    bounds = [(None,0),]*n_ineqs + [(None, None),]*n_eqs
-    res = linprog(b, A_ub=A, b_ub=c, bounds=bounds, method='interior-point')
-    print("dual problem:")
-    print(res)
-    # assert res.success
-    dualvars = list((-1)*res.x)
-    v_power = dualvars[0]
-    v_nodes = dualvars[1:n_ineqs]
-    v_items = dualvars[n_ineqs:]
-    names_nodes = list()
-    for resource in ExtractBuildings:
-        for building in ExtractBuildings[resource]:
-            if building == "Resource Well Pressurizer":
-                st = " Well "
-                for val in Wells[resource]:
-                    names_nodes.append(resource + st + str(val))
-            else:
-                st = " Node "
-                for val in Nodes[resource]:
-                    if val == 1:
-                        purity = "impure"
-                    elif val == 2:
-                        purity = "normal"
-                    elif val == 4:
-                        purity = "pure"
-                    else:
-                        raise ValueError
-                    names_nodes.append(resource + st + purity)
-    assert len(names_nodes) == len(v_nodes)
-    v_nodes = dict((names_nodes[i], v_nodes[i]) for i in range(len(v_nodes)))
-    v_nodes = dict((y, v_nodes[y]) for y in sorted(v_nodes, key = lambda x:v_nodes[x], reverse=True))
-    v_power = {"Power":v_power,}
-    assert len(Items) == len(v_items)
-    v_items = dict((Items[i], v_items[i]) for i in range(len(Items)))
-    v_items = dict((y, v_items[y]) for y in sorted(v_items))
-    return [v_power, v_nodes, v_items]
+def shadowprice(target, unfueled_APAs, fueled_APAs, resource):
+    if resource == "power":
+        r0 = solve_sub(target, unfueled_APAs, fueled_APAs)[1]
+        global FreeExtraPower
+        FreeExtraPower -= 10.0
+        rl = solve_sub(target, unfueled_APAs, fueled_APAs)[1]
+        FreeExtraPower += 20.0
+        rh = solve_sub(target, unfueled_APAs, fueled_APAs)[1]
+        FreeExtraPower -= 10.0
+        res = ((r0-rl)/10.0, (rh-r0)/10.0)
+    else:
+        r0 = solve_sub(target, unfueled_APAs, fueled_APAs)[1]
+        rl = solve_sub(target, unfueled_APAs, fueled_APAs, item_offsets={resource:-1.0})[1]
+        rh = solve_sub(target, unfueled_APAs, fueled_APAs, item_offsets={resource:1.0})[1]
+        res = (r0-rl,rh-r0)
+    if abs(res[0]-res[1]) < 1e-4:
+        return (res[0]+res[1])/2
+    else:
+        return res
+
+def shadowprices(target, unfueled_APAs, fueled_APAs):
+    return dict((res,shadowprice(target,unfueled_APAs,fueled_APAs,res)) for res in ["power",] + Items)
+
+# def shadowprices(target, **kwargs):
+#     sol = solve(target, outputMatrices=True, **kwargs)
+#     # n_vars = len(sol['x'])
+#     n_ineqs = len(sol['b_ub'])
+#     n_eqs = np.shape(sol['A_eq'])[0]
+#     b = (-1) * np.hstack([sol['b_ub'],np.zeros(n_eqs)])
+#     A = np.vstack([sol['A_ub'], sol['A_eq']]).T
+#     c = sol['c']
+#     # print("-b:")
+#     # print(b)
+#     # print("-A:")
+#     # print(A)
+#     # print("-c:")
+#     # print(c)
+#     bounds = [(None,0),]*n_ineqs + [(None, None),]*n_eqs
+#     res = linprog(b, A_ub=A, b_ub=c, bounds=bounds, method='interior-point')
+#     print("dual problem:")
+#     print(res)
+#     # assert res.success
+#     dualvars = list((-1)*res.x)
+#     v_power = dualvars[0]
+#     v_nodes = dualvars[1:n_ineqs]
+#     v_items = dualvars[n_ineqs:]
+#     names_nodes = list()
+#     for resource in ExtractBuildings:
+#         for building in ExtractBuildings[resource]:
+#             if building == "Resource Well Pressurizer":
+#                 st = " Well "
+#                 for val in Wells[resource]:
+#                     names_nodes.append(resource + st + str(val))
+#             else:
+#                 st = " Node "
+#                 for val in Nodes[resource]:
+#                     if val == 1:
+#                         purity = "impure"
+#                     elif val == 2:
+#                         purity = "normal"
+#                     elif val == 4:
+#                         purity = "pure"
+#                     else:
+#                         raise ValueError
+#                     names_nodes.append(resource + st + purity)
+#     assert len(names_nodes) == len(v_nodes)
+#     v_nodes = dict((names_nodes[i], v_nodes[i]) for i in range(len(v_nodes)))
+#     v_nodes = dict((y, v_nodes[y]) for y in sorted(v_nodes, key = lambda x:v_nodes[x], reverse=True))
+#     v_power = {"Power":v_power,}
+#     assert len(Items) == len(v_items)
+#     v_items = dict((Items[i], v_items[i]) for i in range(len(Items)))
+#     v_items = dict((y, v_items[y]) for y in sorted(v_items))
+#     return [v_power, v_nodes, v_items]
